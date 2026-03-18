@@ -193,8 +193,12 @@ if (isset($_GET['edit_pm'])) {
                                 <?= number_format($lineProfit, 2, ',', '.') ?> €
                             </td>
                             <td>
-                                <button class="btn btn-sm btn-outline-secondary"
-                                    onclick="editPM(<?= (int)$pm['id'] ?>, <?= (int)$pm['material_id'] ?>, <?= (float)$pm['quantity'] ?>, <?= (float)$pm['purchase_price'] ?>, <?= (float)$pm['selling_price'] ?>)"
+                                <button class="btn btn-sm btn-outline-secondary btn-edit-pm"
+                                    data-id="<?= (int)$pm['id'] ?>"
+                                    data-material-id="<?= (int)$pm['material_id'] ?>"
+                                    data-quantity="<?= (float)$pm['quantity'] ?>"
+                                    data-purchase="<?= (float)$pm['purchase_price'] ?>"
+                                    data-selling="<?= (float)$pm['selling_price'] ?>"
                                     title="Bearbeiten">
                                     <i class="bi bi-pencil"></i>
                                 </button>
@@ -359,16 +363,19 @@ function resetPMForm() {
     document.getElementById('calcPreview').classList.add('d-none');
 }
 
-function editPM(id, materialId, qty, purchase, selling) {
+document.addEventListener('click', function(e) {
+    const btn = e.target.closest('.btn-edit-pm');
+    if (!btn) return;
+    const d = btn.dataset;
     document.getElementById('pmAction').value = 'edit';
-    document.getElementById('pmId').value = id;
+    document.getElementById('pmId').value = d.id;
     document.getElementById('pmModalLabel').textContent = 'Material bearbeiten';
-    document.getElementById('pmMaterial').value = materialId;
+    document.getElementById('pmMaterial').value = d.materialId;
     document.getElementById('pmMaterial').dispatchEvent(new Event('change'));
-    document.getElementById('pmQty').value = qty;
-    document.getElementById('pmPurchase').value = purchase;
-    document.getElementById('pmSelling').value = selling;
+    document.getElementById('pmQty').value = d.quantity;
+    document.getElementById('pmPurchase').value = d.purchase;
+    document.getElementById('pmSelling').value = d.selling;
     recalc();
     new bootstrap.Modal(document.getElementById('pmModal')).show();
-}
+});
 </script>

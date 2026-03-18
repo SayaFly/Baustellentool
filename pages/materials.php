@@ -40,8 +40,10 @@ $materials = $pdo->query('SELECT * FROM materials ORDER BY name')->fetchAll();
                             <td><?= htmlspecialchars($m['name']) ?></td>
                             <td><span class="badge bg-secondary"><?= htmlspecialchars($m['unit']) ?></span></td>
                             <td>
-                                <button class="btn btn-sm btn-outline-secondary"
-                                    onclick="editMaterial(<?= (int)$m['id'] ?>, <?= htmlspecialchars(json_encode($m['name']), ENT_QUOTES) ?>, '<?= htmlspecialchars($m['unit'], ENT_QUOTES) ?>')">
+                                <button class="btn btn-sm btn-outline-secondary btn-edit-material"
+                                    data-id="<?= (int)$m['id'] ?>"
+                                    data-name="<?= htmlspecialchars($m['name'], ENT_QUOTES) ?>"
+                                    data-unit="<?= htmlspecialchars($m['unit'], ENT_QUOTES) ?>">
                                     <i class="bi bi-pencil"></i>
                                 </button>
                                 <form method="POST" action="actions/material_actions.php" class="d-inline"
@@ -107,12 +109,15 @@ function resetForm() {
     document.getElementById('materialForm').reset();
 }
 
-function editMaterial(id, name, unit) {
+document.addEventListener('click', function(e) {
+    const btn = e.target.closest('.btn-edit-material');
+    if (!btn) return;
+    const d = btn.dataset;
     document.getElementById('formAction').value = 'edit';
-    document.getElementById('materialId').value = id;
+    document.getElementById('materialId').value = d.id;
     document.getElementById('materialModalLabel').textContent = 'Material bearbeiten';
-    document.getElementById('fieldName').value = name;
-    document.getElementById('fieldUnit').value = unit;
+    document.getElementById('fieldName').value = d.name;
+    document.getElementById('fieldUnit').value = d.unit;
     new bootstrap.Modal(document.getElementById('materialModal')).show();
-}
+});
 </script>
