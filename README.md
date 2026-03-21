@@ -22,6 +22,8 @@ Eine webbasierte Baustellenverwaltungs-App mit Kunden-, Material- und Projektver
 
 ## Installation
 
+Hinweis: Offiziell unterstützt wird nur der Betrieb auf Windows Server mit IIS.
+
 📖 **Vollständige Schritt-für-Schritt-Anleitung:**  
 → **[INSTALLATION.md](INSTALLATION.md)**
 

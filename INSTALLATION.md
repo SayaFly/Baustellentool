@@ -2,6 +2,8 @@
 
 Diese Anleitung beschreibt die vollständige Installation des Baustellentools auf einem **Windows Server** mit **IIS (Internet Information Services)**, **PHP** und **MariaDB**.
 
+> Hinweis: Diese Anwendung und diese Anleitung sind auf den Betrieb mit IIS unter Windows Server ausgelegt.
+
 ---
 
 ## Inhaltsverzeichnis
