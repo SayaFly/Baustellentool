@@ -6,8 +6,10 @@ $action = $_POST['action'] ?? '';
 
 switch ($action) {
     case 'add':
-        $name = trim($_POST['name'] ?? '');
-        $unit = $_POST['unit'] ?? 'Stück';
+        $name          = trim($_POST['name'] ?? '');
+        $unit          = $_POST['unit'] ?? 'Stück';
+        $purchasePrice = (($_POST['purchase_price'] ?? '') !== '') ? (float)$_POST['purchase_price'] : null;
+        $sellingPrice  = (($_POST['selling_price']  ?? '') !== '') ? (float)$_POST['selling_price']  : null;
 
         if ($name === '') {
             redirect('materials', 'Name ist erforderlich.', 'error');
@@ -16,15 +18,17 @@ switch ($action) {
             $unit = 'Stück';
         }
 
-        $stmt = $pdo->prepare('INSERT INTO materials (name, unit) VALUES (?, ?)');
-        $stmt->execute([$name, $unit]);
+        $stmt = $pdo->prepare('INSERT INTO materials (name, unit, purchase_price, selling_price) VALUES (?, ?, ?, ?)');
+        $stmt->execute([$name, $unit, $purchasePrice, $sellingPrice]);
         redirect('materials', 'Material erfolgreich hinzugefügt.');
         break;
 
     case 'edit':
-        $id   = (int)($_POST['id'] ?? 0);
-        $name = trim($_POST['name'] ?? '');
-        $unit = $_POST['unit'] ?? 'Stück';
+        $id            = (int)($_POST['id'] ?? 0);
+        $name          = trim($_POST['name'] ?? '');
+        $unit          = $_POST['unit'] ?? 'Stück';
+        $purchasePrice = (($_POST['purchase_price'] ?? '') !== '') ? (float)$_POST['purchase_price'] : null;
+        $sellingPrice  = (($_POST['selling_price']  ?? '') !== '') ? (float)$_POST['selling_price']  : null;
 
         if (!$id || $name === '') {
             redirect('materials', 'Ungültige Eingaben.', 'error');
@@ -33,8 +37,8 @@ switch ($action) {
             $unit = 'Stück';
         }
 
-        $stmt = $pdo->prepare('UPDATE materials SET name=?, unit=? WHERE id=?');
-        $stmt->execute([$name, $unit, $id]);
+        $stmt = $pdo->prepare('UPDATE materials SET name=?, unit=?, purchase_price=?, selling_price=? WHERE id=?');
+        $stmt->execute([$name, $unit, $purchasePrice, $sellingPrice, $id]);
         redirect('materials', 'Material erfolgreich aktualisiert.');
         break;
 

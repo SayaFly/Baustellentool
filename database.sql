@@ -46,12 +46,14 @@ CREATE TABLE IF NOT EXISTS projects (
 );
 
 -- -------------------------
--- Materialien (global, ohne Preise)
+-- Materialien (global)
 -- -------------------------
 CREATE TABLE IF NOT EXISTS materials (
-    id   INT          PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(255) NOT NULL,
-    unit ENUM('m²','m³','Stück') NOT NULL DEFAULT 'Stück'
+    id             INT           PRIMARY KEY AUTO_INCREMENT,
+    name           VARCHAR(255)  NOT NULL,
+    unit           ENUM('m²','m³','Stück') NOT NULL DEFAULT 'Stück',
+    purchase_price DECIMAL(10,2) DEFAULT NULL,
+    selling_price  DECIMAL(10,2) DEFAULT NULL
 );
 
 -- -------------------------

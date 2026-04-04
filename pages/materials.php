@@ -3,6 +3,13 @@ require_once __DIR__ . '/../config/database.php';
 $pdo = getDB();
 
 $materials = $pdo->query('SELECT * FROM materials ORDER BY name')->fetchAll();
+
+function formatPrice(?string $value): string {
+    if ($value === null) {
+        return '<span class="text-muted">–</span>';
+    }
+    return number_format((float)$value, 2, ',', '.') . ' €';
+}
 ?>
 <div class="top-navbar d-flex align-items-center justify-content-between">
     <h5 class="mb-0 fw-semibold"><i class="bi bi-box-seam me-2 text-primary"></i>Materialien</h5>
@@ -30,6 +37,8 @@ $materials = $pdo->query('SELECT * FROM materials ORDER BY name')->fetchAll();
                             <th>#</th>
                             <th>Name</th>
                             <th>Einheit</th>
+                            <th class="text-end">Einkaufspreis</th>
+                            <th class="text-end">Verkaufspreis</th>
                             <th>Aktionen</th>
                         </tr>
                     </thead>
@@ -39,11 +48,15 @@ $materials = $pdo->query('SELECT * FROM materials ORDER BY name')->fetchAll();
                             <td><?= (int)$m['id'] ?></td>
                             <td><?= htmlspecialchars($m['name']) ?></td>
                             <td><span class="badge bg-secondary"><?= htmlspecialchars($m['unit']) ?></span></td>
+                            <td class="text-end"><?= formatPrice($m['purchase_price']) ?></td>
+                            <td class="text-end"><?= formatPrice($m['selling_price']) ?></td>
                             <td>
                                 <button class="btn btn-sm btn-outline-secondary btn-edit-material"
                                     data-id="<?= (int)$m['id'] ?>"
                                     data-name="<?= htmlspecialchars($m['name'], ENT_QUOTES) ?>"
-                                    data-unit="<?= htmlspecialchars($m['unit'], ENT_QUOTES) ?>">
+                                    data-unit="<?= htmlspecialchars($m['unit'], ENT_QUOTES) ?>"
+                                    data-purchase="<?= $m['purchase_price'] !== null ? (float)$m['purchase_price'] : '' ?>"
+                                    data-selling="<?= $m['selling_price'] !== null ? (float)$m['selling_price'] : '' ?>">
                                     <i class="bi bi-pencil"></i>
                                 </button>
                                 <form method="POST" action="actions/material_actions.php" class="d-inline"
@@ -58,7 +71,7 @@ $materials = $pdo->query('SELECT * FROM materials ORDER BY name')->fetchAll();
                         </tr>
                         <?php endforeach; ?>
                         <?php if (empty($materials)): ?>
-                        <tr><td colspan="4" class="text-center text-muted py-3">Keine Materialien vorhanden</td></tr>
+                        <tr><td colspan="6" class="text-center text-muted py-3">Keine Materialien vorhanden</td></tr>
                         <?php endif; ?>
                     </tbody>
                 </table>
@@ -91,6 +104,16 @@ $materials = $pdo->query('SELECT * FROM materials ORDER BY name')->fetchAll();
                             <option value="m³">m³</option>
                         </select>
                     </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col">
+                            <label class="form-label">Einkaufspreis/Einheit (€)</label>
+                            <input type="number" name="purchase_price" id="fieldPurchase" class="form-control" step="0.01" min="0" placeholder="Optional">
+                        </div>
+                        <div class="col">
+                            <label class="form-label">Verkaufspreis/Einheit (€)</label>
+                            <input type="number" name="selling_price" id="fieldSelling" class="form-control" step="0.01" min="0" placeholder="Optional">
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Abbrechen</button>
@@ -118,6 +141,8 @@ document.addEventListener('click', function(e) {
     document.getElementById('materialModalLabel').textContent = 'Material bearbeiten';
     document.getElementById('fieldName').value = d.name;
     document.getElementById('fieldUnit').value = d.unit;
+    document.getElementById('fieldPurchase').value = d.purchase;
+    document.getElementById('fieldSelling').value = d.selling;
     new bootstrap.Modal(document.getElementById('materialModal')).show();
 });
 </script>

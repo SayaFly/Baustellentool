@@ -142,12 +142,18 @@ $statusMap = ['geplant' => 'primary', 'in Arbeit' => 'warning', 'abgeschlossen' 
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Kunde <span class="text-danger">*</span></label>
-                        <select name="customer_id" id="fieldCustomer" class="form-select" required>
-                            <option value="">Bitte wählen...</option>
-                            <?php foreach ($customers as $c): ?>
-                            <option value="<?= (int)$c['id'] ?>"><?= htmlspecialchars($c['name']) ?></option>
-                            <?php endforeach; ?>
-                        </select>
+                        <div class="input-group">
+                            <select name="customer_id" id="fieldCustomer" class="form-select" required>
+                                <option value="">Bitte wählen...</option>
+                                <?php foreach ($customers as $c): ?>
+                                <option value="<?= (int)$c['id'] ?>"><?= htmlspecialchars($c['name']) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                            <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal"
+                                    data-bs-target="#customerQuickModal" title="Neuen Kunden anlegen">
+                                <i class="bi bi-person-plus"></i>
+                            </button>
+                        </div>
                     </div>
                     <div class="row g-3 mb-3">
                         <div class="col">
@@ -182,6 +188,47 @@ $statusMap = ['geplant' => 'primary', 'in Arbeit' => 'warning', 'abgeschlossen' 
     </div>
 </div>
 
+<!-- Customer Quick-Add Modal -->
+<!-- z-index 1060: above the project modal (Bootstrap default is 1055) -->
+<div class="modal fade" id="customerQuickModal" tabindex="-1" style="z-index:1060">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-person-plus me-2"></i>Neuen Kunden anlegen</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="customerQuickError" class="alert alert-danger d-none"></div>
+                <div class="mb-3">
+                    <label class="form-label">Name <span class="text-danger">*</span></label>
+                    <input type="text" id="cqName" class="form-control" maxlength="255">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Adresse</label>
+                    <textarea id="cqAddress" class="form-control" rows="2"></textarea>
+                </div>
+                <div class="row g-3 mb-3">
+                    <div class="col">
+                        <label class="form-label">Telefon</label>
+                        <input type="text" id="cqPhone" class="form-control" maxlength="50">
+                    </div>
+                    <div class="col">
+                        <label class="form-label">E-Mail</label>
+                        <input type="email" id="cqEmail" class="form-control" maxlength="255">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Abbrechen</button>
+                <button type="button" class="btn btn-primary" id="cqSaveBtn">
+                    <span id="cqSpinner" class="spinner-border spinner-border-sm d-none me-1"></span>
+                    Speichern
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 function resetForm() {
     document.getElementById('formAction').value = 'add';
@@ -205,5 +252,59 @@ document.addEventListener('click', function(e) {
     document.getElementById('fieldDate').value = d.date;
     document.getElementById('fieldDescription').value = d.description;
     new bootstrap.Modal(document.getElementById('projectModal')).show();
+});
+
+// Customer quick-add
+document.getElementById('customerQuickModal').addEventListener('show.bs.modal', function() {
+    document.getElementById('cqName').value = '';
+    document.getElementById('cqAddress').value = '';
+    document.getElementById('cqPhone').value = '';
+    document.getElementById('cqEmail').value = '';
+    document.getElementById('customerQuickError').classList.add('d-none');
+});
+
+document.getElementById('cqSaveBtn').addEventListener('click', function() {
+    const name = document.getElementById('cqName').value.trim();
+    const errEl = document.getElementById('customerQuickError');
+    if (!name) {
+        errEl.textContent = 'Name ist erforderlich.';
+        errEl.classList.remove('d-none');
+        return;
+    }
+    errEl.classList.add('d-none');
+
+    const spinner = document.getElementById('cqSpinner');
+    const btn = document.getElementById('cqSaveBtn');
+    spinner.classList.remove('d-none');
+    btn.disabled = true;
+
+    const body = new FormData();
+    body.append('name',    name);
+    body.append('address', document.getElementById('cqAddress').value.trim());
+    body.append('phone',   document.getElementById('cqPhone').value.trim());
+    body.append('email',   document.getElementById('cqEmail').value.trim());
+
+    fetch('actions/customer_quick_add.php', {method: 'POST', body})
+        .then(r => r.json())
+        .then(data => {
+            if (data.error) {
+                errEl.textContent = data.error;
+                errEl.classList.remove('d-none');
+                return;
+            }
+            const select = document.getElementById('fieldCustomer');
+            const opt = new Option(data.name, data.id, true, true);
+            select.add(opt);
+
+            bootstrap.Modal.getInstance(document.getElementById('customerQuickModal')).hide();
+        })
+        .catch(() => {
+            errEl.textContent = 'Fehler beim Speichern. Bitte erneut versuchen.';
+            errEl.classList.remove('d-none');
+        })
+        .finally(() => {
+            spinner.classList.add('d-none');
+            btn.disabled = false;
+        });
 });
 </script>
